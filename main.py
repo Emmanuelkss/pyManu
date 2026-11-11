@@ -1,5 +1,12 @@
 from enum import Enum
+import datetime as dt
 
+import time
+
+
+class MoodState(Enum):
+    GOOD = 1
+    FINE = 2
 class Player():
     def __init__(self, name: str, origin: str, level: int, height: int):
         self.name = name
@@ -7,6 +14,19 @@ class Player():
         self.level = level
         self.height = height
 
+class Activity():
+    def __init__(self, name:str, activity_type: ActivityType, during_time: dt.datetime):
+        self.name = name
+        self.activity_type = activity_type
+        self.during_time = during_time
+
+
+class ActivityType(Enum):
+    FUN = 0
+    OK = 1
+    NOT_GREAT = 2
+    BORING = 3
+    TRASH = 4
 
 
 class MoodState(Enum):
@@ -59,3 +79,4 @@ def is_happy(social_time: float, stress_level: int, mood: MoodState, did_somethi
     score += (10 - stress_level) / 10 * 25
     score += 15 if did_something_fun else 0
     return score >= 60
+
