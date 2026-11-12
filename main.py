@@ -1,82 +1,51 @@
-from enum import Enum
 import datetime as dt
 
-import time
+from humeur import (
+    Player, Day, Activity,
+    ActivityType, Category, MoodState, MentalState,
+    focus_score, happiness_score, afficher_bilan,
+)
 
 
-class MoodState(Enum):
-    GOOD = 1
-    FINE = 2
-class Player():
-    def __init__(self, name: str, origin: str, level: int, height: int):
-        self.name = name
-        self.origin = origin
-        self.level = level
-        self.height = height
+def main():
+    joueur = Player(name="Emmanuel", origin="Sherbrooke", level=3)
 
-class Activity():
-    def __init__(self, name:str, activity_type: ActivityType, during_time: dt.datetime):
-        self.name = name
-        self.activity_type = activity_type
-        self.during_time = during_time
+    # Journée 1 : plutôt bonne
+    lundi = Day(
+        player=joueur,
+        date=dt.date(2026, 11, 9),
+        sleep_time=7.5,
+        mood=MoodState.GOOD,
+        mental_state=MentalState.MOTIVATED,
+        stress_level=3,
+    )
+    lundi.add_activity(Activity("Révision AVL", ActivityType.OK, Category.STUDY, dt.timedelta(hours=2)))
+    lundi.add_activity(Activity("Basket", ActivityType.FUN, Category.SPORT, dt.timedelta(hours=1, minutes=30)))
+    lundi.add_activity(Activity("Souper entre amis", ActivityType.FUN, Category.SOCIAL, dt.timedelta(hours=2)))
+    lundi.add_activity(Activity("YouTube", ActivityType.OK, Category.SCREEN, dt.timedelta(hours=1)))
 
+    # Journée 2 : plus difficile
+    mardi = Day(
+        player=joueur,
+        date=dt.date(2026, 11, 10),
+        sleep_time=5,
+        mood=MoodState.NOT_GREAT,
+        mental_state=MentalState.STRESSED,
+        stress_level=8,
+    )
+    mardi.add_activity(Activity("Devoir de C++", ActivityType.BORING, Category.STUDY, dt.timedelta(hours=1)))
+    mardi.add_activity(Activity("TikTok", ActivityType.TRASH, Category.SCREEN, dt.timedelta(hours=4)))
 
-class ActivityType(Enum):
-    FUN = 0
-    OK = 1
-    NOT_GREAT = 2
-    BORING = 3
-    TRASH = 4
+    # Bilan de chaque jour (afficher_bilan appelle decrire_journee + scores + suggestions)
+    semaine = [lundi, mardi]
+    for jour in semaine:
+        afficher_bilan(jour)
 
-
-class MoodState(Enum):
-    GOOD = 1
-    FINE = 2
-    NOT_GREAT = 3
-    BAD = 4
-
-
-class MentalState(Enum):
-    EXHAUSTED = 1
-    STRESSED = 2
-    NEUTRAL = 3
-    CALM = 4
-    MOTIVATED = 5
-
-MOOD_POINTS = {
-    MoodState.GOOD: 35,
-    MoodState.FINE: 25,
-    MoodState.NOT_GREAT: 10,
-    MoodState.BAD: 0,
-}
-
-MENTAL_POINTS = {
-    MentalState.EXHAUSTED: 0,
-    MentalState.STRESSED: 10,
-    MentalState.NEUTRAL: 20,
-    MentalState.CALM: 30,
-    MentalState.MOTIVATED: 35,
-}
+    # Moyenne de la semaine
+    moy_focus = sum(focus_score(j) for j in semaine) / len(semaine)
+    moy_bonheur = sum(happiness_score(j) for j in semaine) / len(semaine)
+    print(f"Moyenne sur {len(semaine)} jours : concentration {moy_focus:.1f}, bonheur {moy_bonheur:.1f}")
 
 
-def is_focused(study_time, sleep_time, mental_state: MentalState, screen_time):
-    if mental_state == MentalState.EXHAUSTED:
-        return False  # deal-breaker, no need to go further
-
-    score = MENTAL_POINTS[mental_state]
-    score += min(sleep_time / 8, 1) * 35
-    score += max(1 - screen_time / 6, 0) * 20
-    score += min(study_time / 2, 1) * 10
-    return score >= 60
-
-
-def is_happy(social_time: float, stress_level: int, mood: MoodState, did_something_fun: bool) -> bool:
-    if mood == MoodState.BAD:
-        return False
-
-    score = MOOD_POINTS[mood]
-    score += min(social_time / 2, 1) * 25
-    score += (10 - stress_level) / 10 * 25
-    score += 15 if did_something_fun else 0
-    return score >= 60
-
+if __name__ == "__main__":
+    main()
