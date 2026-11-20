@@ -28,6 +28,8 @@ Le jeu utilise **pygame-ce**, qui fonctionne avec Python 3.14.
 3. Clique sur **Finir la journée** quand tu veux, puis choisis tes heures de sommeil. 7 à 9 h, c'est l'idéal.
 4. Lis ton bilan et passe au jour suivant.
 
+Tes 5 meilleures parties sont gardées dans `scores.json` : le top 3 s'affiche sur l'écran titre, et la fin de semaine te dit si tu as battu ton record.
+
 Attention : un événement aléatoire peut arriver au début de chaque journée (examen surprise, invitation, mal de tête...), et si l'énergie tombe à 0 avec un stress très élevé, c'est le burnout.
 
 ## Organisation du code
@@ -36,6 +38,7 @@ Attention : un événement aléatoire peut arriver au début de chaque journée 
 |---|---|
 | `humeur.py` | Classes `Player`, `Activity`, `Day`, scores de concentration et de bonheur, description de la journée |
 | `moteur.py` | Logique du jeu, sans interface : personnage, effets des activités, événements, XP, partie de 7 jours |
+| `scores.py` | Meilleurs scores : lecture et écriture de `scores.json`, sans interface |
 | `jeu.py` | Interface pygame : écrans, boutons, avatar |
 | `main.py` | Exemple dans le terminal |
 

@@ -17,6 +17,7 @@ from moteur import (
     Partie, Personnage, Evenement, ACTIVITES, ChoixActivite,
     NB_JOURS, XP_PAR_NIVEAU,
 )
+import scores
 
 LARGEUR, HAUTEUR = 1100, 700
 FPS = 60
@@ -217,6 +218,8 @@ class Jeu:
         self.popup: Evenement | None = None
         self.flottants: list[dict] = []
         self.t = 0.0
+        self.meilleurs = scores.charger()
+        self.place_record: int | None = None
 
     # ----- Boucle principale -----
 
@@ -301,6 +304,7 @@ class Jeu:
     def suivant(self):
         self.partie.jour_suivant()
         if self.partie.finie:
+            self.meilleurs, self.place_record = scores.ajouter(scores.score_de_partie(self.partie))
             self.scene = "fin"
         else:
             self.debut_journee()
@@ -311,6 +315,7 @@ class Jeu:
     def rejouer(self):
         self.partie = None
         self.bilan = None
+        self.place_record = None
         self.scene = "titre"
 
     def quitter(self):
@@ -403,6 +408,12 @@ class Jeu:
         pygame.draw.rect(self.ecran, ACCENT, champ, 2, border_radius=10)
         curseur = "|" if int(self.t * 2) % 2 == 0 else ""
         ecrire_centre(self.ecran, self.nom + curseur, P["h2"], TEXTE, champ.center)
+
+        if self.meilleurs:
+            ecrire_centre(self.ecran, "Meilleurs scores", P["normal_gras"], JAUNE, (LARGEUR // 2, 415))
+            for i, s in enumerate(self.meilleurs[:3], start=1):
+                ligne = f"{i}. {s.nom}  •  niveau {s.niveau}  •  {s.xp} XP"
+                ecrire_centre(self.ecran, ligne, P["petit"], DISCRET, (LARGEUR // 2, 425 + i * 24))
 
         regles = (f"{NB_JOURS} jours  •  16 h par jour  •  Choisis la durée puis l'activité  "
                   "•  Touches 1 à 5 pour aller plus vite")
@@ -551,6 +562,15 @@ class Jeu:
             barre(self.ecran, pygame.Rect(720, yy + 4, 140, 14), b.bonheur, ROSE)
             ecrire(self.ecran, f"+{b.xp_gagne}", P["normal"], VERT, (880, yy))
             yy += 36
+
+        # Classement des meilleures parties
+        if self.place_record == 1:
+            texte, couleur = "Nouveau record !", JAUNE
+        elif self.place_record:
+            texte, couleur = f"{self.place_record}e meilleur score", VERT
+        else:
+            texte, couleur = f"Record à battre : {self.meilleurs[0].xp} XP", DISCRET
+        ecrire(self.ecran, texte, P["h2"], couleur, (430, yy + 14))
 
     def dessiner_popup(self):
         voile = pygame.Surface((LARGEUR, HAUTEUR), pygame.SRCALPHA)
